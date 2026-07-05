@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - AskCodzz</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #4f46e5, #7c3aed);
+      --bg-color: #ffffff;
+      --surface-color: rgba(255, 255, 255, 0.95);
+      --text-color: #1e293b;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --surface-color: rgba(30, 41, 59, 0.95);
+      --text-color: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border-color: #334155;
+      --success-color: #22c55e;
+      --error-color: #f87171;
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      min-height: 100vh;
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+
+    .navbar {
+      background: var(--surface-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link:hover {
+      background: var(--border-color);
+      color: var(--text-color);
+    }
+
+    .nav-link.active {
+      background: var(--secondary-gradient);
+      color: white;
+    }
+
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--border-color);
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .header-btn:hover {
+      background: var(--secondary-gradient);
+      color: white;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .dashboard-header {
+      margin-bottom: 32px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+      color: var(--text-color);
+    }
+
+    .dashboard-header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px var(--shadow);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .stat-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: var(--secondary-gradient);
+      color: white;
+    }
+
+    .stat-card-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-color);
+      margin-bottom: 4px;
+    }
+
+    .stat-card-label {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .chart-container {
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 6px var(--shadow);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .chart-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 400px;
+    }
+
+    .language-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .language-item {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .language-name {
+      font-weight: 600;
+      color: var(--text-color);
+      text-transform: capitalize;
+    }
+
+    .language-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .language-count {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .language-percentage {
+      font-weight: 600;
+      color: var(--success-color);
+      font-size: 18px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--secondary-gradient);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: var(--text-secondary);
+    }
+
+    .loading i {
+      font-size: 48px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state i {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: var(--text-color);
+    }
+
+    .period-selector {
+      display: flex;
+      gap: 8px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .period-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .period-btn.active {
+      background: var(--secondary-gradient);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-wrapper {
+        height: 300px;
+      }
+
+      .language-list {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <i class="fas fa-robot"></i>
+      <span>AskCodzz</span>
+    </div>
+    <div class="nav-links">
+      <a href="/chat" class="nav-link">
+        <i class="fas fa-comments"></i>
+        <span>Chat</span>
+      </a>
+      <a href="/dashboard" class="nav-link active">
+        <i class="fas fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+      <button class="header-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">
+        <i class="fas fa-moon"></i>
+      </button>
+      <button class="header-btn" onclick="logout()" title="Logout">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1><i class="fas fa-chart-pie"></i> Analytics Dashboard</h1>
+      <p>View your programming language usage statistics</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-icon">
+            <i class="fas fa-code"></i>
+          </div>
+        </div>
+        <div class="stat-card-value" id="totalLanguages">0</div>
+        <div class="stat-card-label">Programming Languages</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-icon">
+            <i class="fas fa-search"></i>
+          </div>
+        </div>
+        <div class="stat-card-value" id="totalQueries">0</div>
+        <div class="stat-card-label">Total Queries</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-icon">
+            <i class="fas fa-fire"></i>
+          </div>
+        </div>
+        <div class="stat-card-value" id="topLanguage">-</div>
+        <div class="stat-card-label">Most Used Language</div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-header">
+        <div class="chart-title">Language Usage Distribution (Last 30 Days)</div>
+        <div class="period-selector">
+          <button class="period-btn active" onclick="changePeriod(30)">30 Days</button>
+          <button class="period-btn" onclick="changePeriod(7)">7 Days</button>
+          <button class="period-btn" onclick="changePeriod(90)">90 Days</button>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="languageChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-header">
+        <div class="chart-title">Language Statistics</div>
+      </div>
+      <div id="languageList" class="language-list">
+        <div class="loading">
+          <i class="fas fa-spinner"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let languageChart = null;
+    let currentPeriod = 30;
+
+    // Load theme from localStorage
+    const savedTheme = localStorage.getItem('dashboard-theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+    updateThemeButton();
+
+    function toggleTheme() {
+      const currentTheme = document.body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('dashboard-theme', newTheme);
+      updateThemeButton();
+      
+      // Re-render chart with new theme colors
+      if (languageChart) {
+        loadDashboardData();
+      }
+    }
+
+    function updateThemeButton() {
+      const themeBtn = document.getElementById('themeBtn');
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    }
+
+    async function loadDashboardData() {
+      try {
+        const response = await fetch(`/api/dashboard/stats?days=${currentPeriod}`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          displayStats(data.language_stats);
+        } else {
+          showError('Failed to load dashboard data');
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        showError('Failed to load dashboard data');
+      }
+    }
+
+    function displayStats(stats) {
+      // Update summary cards
+      const totalLanguages = stats.length;
+      const totalQueries = stats.reduce((sum, stat) => sum + stat.count, 0);
+      const topLanguage = stats.length > 0 ? stats[0].language : '-';
+
+      document.getElementById('totalLanguages').textContent = totalLanguages;
+      document.getElementById('totalQueries').textContent = totalQueries;
+      document.getElementById('topLanguage').textContent = topLanguage.charAt(0).toUpperCase() + topLanguage.slice(1);
+
+      // Render chart
+      renderChart(stats);
+
+      // Render language list
+      renderLanguageList(stats);
+    }
+
+    function renderChart(stats) {
+      const ctx = document.getElementById('languageChart').getContext('2d');
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+
+      if (languageChart) {
+        languageChart.destroy();
+      }
+
+      const colors = [
+        '#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe',
+        '#43e97b', '#fa709a', '#fee140', '#30cfd0', '#a8edea'
+      ];
+
+      languageChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: stats.map(s => s.language.charAt(0).toUpperCase() + s.language.slice(1)),
+          datasets: [{
+            data: stats.map(s => s.count),
+            backgroundColor: colors.slice(0, stats.length),
+            borderWidth: 2,
+            borderColor: isDark ? '#1e293b' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: isDark ? '#f1f5f9' : '#1e293b',
+                padding: 15,
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} queries (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderLanguageList(stats) {
+      const container = document.getElementById('languageList');
+      
+      if (stats.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <i class="fas fa-chart-bar"></i>
+            <h3>No Data Available</h3>
+            <p>Start asking questions about programming languages to see statistics here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const maxCount = Math.max(...stats.map(s => s.count));
+
+      container.innerHTML = stats.map(stat => `
+        <div class="language-item">
+          <div class="language-name">${stat.language.charAt(0).toUpperCase() + stat.language.slice(1)}</div>
+          <div class="language-stats">
+            <span class="language-count">${stat.count} queries</span>
+            <span class="language-percentage">${stat.percentage}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${(stat.count / maxCount) * 100}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function changePeriod(days) {
+      currentPeriod = days;
+      
+      // Update active button
+      document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes(days)) {
+          btn.classList.add('active');
+        }
+      });
+
+      loadDashboardData();
+    }
+
+    function showError(message) {
+      const container = document.getElementById('languageList');
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Error</h3>
+          <p>${message}</p>
+        </div>
+      `;
+    }
+
+    async function logout() {
+      try {
+        const response = await fetch('/logout', {
+          method: 'POST',
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          window.location.href = '/login';
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login';
+      }
+    }
+
+    // Load data on page load
+    loadDashboardData();
+  </script>
+</body>
+</html>
+
